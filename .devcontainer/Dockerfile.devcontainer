@@ -11,6 +11,7 @@ RUN apt-get update && \
         lsb-release \
         apt-transport-https \
         git \
+        openssh-client \
         sudo \
         iproute2 \
         iputils-ping \
