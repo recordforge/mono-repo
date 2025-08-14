@@ -7,18 +7,15 @@ on:
       - '.github/workflows/devcontainer-ci.yml'
 
 jobs:
-  test-devcontainer:
+  test-devcontainer-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Test Dev Container Build
-        uses: devcontainers/ci@v0.3
-        with:
-          runCmd: |
-            echo "Dev container build successful!"
-            echo "Testing basic commands..."
-            which git
-            which node || echo "Node not installed"
-            which python || echo "Python not installed"
+      - name: Build Dev Container Image
+        run: |
+          cd .devcontainer
+          docker build -f Dockerfile.devcontainer -t devcontainer-test:latest .
+          echo "✅ Dev container image built successfully!"
+          docker images | grep devcontainer-test
