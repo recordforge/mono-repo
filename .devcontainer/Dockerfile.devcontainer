@@ -27,6 +27,7 @@ RUN apt-get update && \
         fonts-powerline \
         locales \
         make \
+        direnv \
         && rm -rf /var/lib/apt/lists/*
 
 # Set locale
@@ -86,12 +87,29 @@ USER $USERNAME
 RUN curl -Ls https://astral.sh/uv/install.sh | bash
 ENV PATH="/home/vscode/.cargo/bin:${PATH}"
 
-# Install Oh My Zsh and plugins
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended && \
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting && \
-    git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions && \
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
+# Install Oh My Zsh and plugins with retry logic
+RUN for i in 1 2 3 4 5; do \
+        echo "Attempt $i to install Oh My Zsh..." && \
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended && \
+        break || \
+        if [ $i -eq 5 ]; then \
+            echo "Failed to install Oh My Zsh after 5 attempts, continuing without it"; \
+            break; \
+        fi; \
+        echo "Retrying in 5 seconds..." && sleep 5; \
+    done && \
+    for i in 1 2 3; do \
+        git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting && \
+        git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions && \
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k && \
+        break || \
+        if [ $i -eq 3 ]; then \
+            echo "Failed to clone plugins after 3 attempts, continuing without them"; \
+            break; \
+        fi; \
+        echo "Retrying plugin installation in 5 seconds..." && sleep 5; \
+    done || true
 
 # Configure Zsh
 COPY --chown=$USERNAME:$USERNAME .zshrc /home/$USERNAME/.zshrc

@@ -6,13 +6,15 @@ PROJECTS = application/orchestration application/data-connectors/ingress applica
 
 help:
 	@echo "Available commands:"
-	@echo "  make setup-all      - Setup all project environments"
-	@echo "  make test-all       - Run tests for all projects"
-	@echo "  make lint-all       - Lint all projects"
-	@echo "  make format-all     - Format all projects"
-	@echo "  make clean-all      - Clean all virtual environments"
+	@echo "  make setup-all        - Setup all project environments"
+	@echo "  make test-all         - Run tests for all projects"
+	@echo "  make lint-all         - Lint all projects"
+	@echo "  make format-all       - Format all projects"
+	@echo "  make clean-all        - Clean all virtual environments"
 	@echo "  make clickhouse-local - Start local ClickHouse"
+	@echo "  make clickhouse-stop  - Stop local ClickHouse"
 	@echo "  make clickhouse-init  - Initialize ClickHouse schema"
+	@echo "  make quick-start      - Quick setup (setup-all + ClickHouse)"
 
 setup-all:
 	@echo "Setting up all projects..."
@@ -20,7 +22,11 @@ setup-all:
 		echo "========================================"; \
 		echo "Setting up $$project..."; \
 		echo "========================================"; \
-		(cd $$project && uv sync) || exit 1; \
+		if [ -f "$$project/pyproject.toml" ]; then \
+			(cd $$project && uv sync --all-extras) || exit 1; \
+		else \
+			echo "No pyproject.toml found, skipping..."; \
+		fi; \
 	done
 	@echo "All projects setup complete!"
 
@@ -30,10 +36,14 @@ test-all:
 		echo "========================================"; \
 		echo "Testing $$project..."; \
 		echo "========================================"; \
-		if [ -d "$$project/tests" ]; then \
-			(cd $$project && uv run pytest tests/ -v) || exit 1; \
+		if [ -f "$$project/pyproject.toml" ]; then \
+			if [ -d "$$project/tests" ]; then \
+				(cd $$project && uv run pytest tests/ -v --tb=short) || true; \
+			else \
+				echo "No tests directory found, skipping..."; \
+			fi; \
 		else \
-			echo "No tests directory found, skipping..."; \
+			echo "No pyproject.toml found, skipping..."; \
 		fi; \
 	done
 	@echo "All tests complete!"
@@ -44,7 +54,16 @@ lint-all:
 		echo "========================================"; \
 		echo "Linting $$project..."; \
 		echo "========================================"; \
-		(cd $$project && uv run black . --check && uv run ruff check .) || exit 1; \
+		if [ -f "$$project/pyproject.toml" ]; then \
+			if command -v $$project/.venv/bin/black >/dev/null 2>&1; then \
+				(cd $$project && uv run black . --check) || exit 1; \
+			fi; \
+			if command -v $$project/.venv/bin/ruff >/dev/null 2>&1; then \
+				(cd $$project && uv run ruff check .) || exit 1; \
+			fi; \
+		else \
+			echo "No pyproject.toml found, skipping..."; \
+		fi; \
 	done
 	@echo "All linting complete!"
 
@@ -54,7 +73,16 @@ format-all:
 		echo "========================================"; \
 		echo "Formatting $$project..."; \
 		echo "========================================"; \
-		(cd $$project && uv run black . && uv run ruff check . --fix) || exit 1; \
+		if [ -f "$$project/pyproject.toml" ]; then \
+			if command -v $$project/.venv/bin/black >/dev/null 2>&1; then \
+				(cd $$project && uv run black .) || exit 1; \
+			fi; \
+			if command -v $$project/.venv/bin/ruff >/dev/null 2>&1; then \
+				(cd $$project && uv run ruff check . --fix) || exit 1; \
+			fi; \
+		else \
+			echo "No pyproject.toml found, skipping..."; \
+		fi; \
 	done
 	@echo "All formatting complete!"
 

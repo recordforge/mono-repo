@@ -21,6 +21,7 @@
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
     context                   # user@hostname
     dir                       # current directory
+    virtualenv                # python virtual environment (shows active venv)
     vcs                       # git status
     command_execution_time    # duration of the last command
     status                    # exit code of the last command
@@ -31,7 +32,6 @@
   # The list of segments shown on the right.
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
     command_execution_time    # duration of the last command
-    virtualenv                # python virtual environment
     pyenv                     # python environment
     nodeenv                   # node.js environment
     kubecontext               # current kubernetes context
@@ -140,11 +140,19 @@
   typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE_BACKGROUND=236
 
   # Python virtual environment
-  typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=37
+  typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=226  # Bright yellow
   typeset -g POWERLEVEL9K_VIRTUALENV_BACKGROUND=236
-  typeset -g POWERLEVEL9K_VIRTUALENV_SHOW_PYTHON_VERSION=false
+  typeset -g POWERLEVEL9K_VIRTUALENV_SHOW_PYTHON_VERSION=true  # Show Python version
   typeset -g POWERLEVEL9K_VIRTUALENV_SHOW_WITH_PYENV=false
   typeset -g POWERLEVEL9K_VIRTUALENV_{LEFT,RIGHT}_DELIMITER=
+  typeset -g POWERLEVEL9K_VIRTUALENV_VISUAL_IDENTIFIER_EXPANSION='🐍'  # Python icon
+  
+  # Custom formatting for virtualenv - show project name instead of .venv
+  typeset -g POWERLEVEL9K_VIRTUALENV_GENERIC_NAMES=(
+    .venv venv env
+    virtualenv virtualenvwrapper
+    virtualfish
+  )
 
   # Node version
   typeset -g POWERLEVEL9K_NODEENV_FOREGROUND=70

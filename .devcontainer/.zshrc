@@ -141,6 +141,30 @@ git config --global user.email "$(gh api user --jq .login 2>/dev/null || echo vs
 # UV (Python package manager)
 export PATH="/home/vscode/.cargo/bin:$PATH"
 
+# Direnv for automatic venv activation
+eval "$(direnv hook zsh)"
+
+# Function to automatically create .envrc files for UV projects
+uv_direnv_setup() {
+    if [ -f "pyproject.toml" ] && [ -d ".venv" ]; then
+        if [ ! -f ".envrc" ]; then
+            # Create .envrc with custom prompt name
+            cat > .envrc << 'EOF'
+# Activate virtual environment
+source .venv/bin/activate
+
+# Set custom prompt name to show project name instead of .venv
+export VIRTUAL_ENV_PROMPT="($(basename $(pwd)))"
+EOF
+            direnv allow
+            echo "✅ Created and allowed .envrc for UV virtual environment"
+        fi
+    fi
+}
+
+# Auto-setup direnv when entering directories with UV projects
+add-zsh-hook chpwd uv_direnv_setup
+
 # Node.js
 export NODE_OPTIONS="--max-old-space-size=4096"
 
