@@ -26,6 +26,7 @@ RUN apt-get update && \
         zsh \
         fonts-powerline \
         locales \
+        make \
         && rm -rf /var/lib/apt/lists/*
 
 # Set locale
