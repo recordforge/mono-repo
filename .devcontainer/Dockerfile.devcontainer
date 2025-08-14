@@ -92,8 +92,8 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
 
 # Configure Zsh
-COPY --chown=$USERNAME:$USERNAME .devcontainer/.zshrc /home/$USERNAME/.zshrc
-COPY --chown=$USERNAME:$USERNAME .devcontainer/.p10k.zsh /home/$USERNAME/.p10k.zsh
+COPY --chown=$USERNAME:$USERNAME .zshrc /home/$USERNAME/.zshrc
+COPY --chown=$USERNAME:$USERNAME .p10k.zsh /home/$USERNAME/.p10k.zsh
 
 WORKDIR /workspace
 

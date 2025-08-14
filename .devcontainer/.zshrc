@@ -98,7 +98,8 @@ mkcd() {
     mkdir -p "$1" && cd "$1"
 }
 
-# Function for quick git commit
+# Function for quick git commit (unset alias first if it exists)
+unalias gcm 2>/dev/null || true
 gcm() {
     git commit -m "$*"
 }
