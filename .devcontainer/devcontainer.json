@@ -17,7 +17,7 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "bash -c 'echo \"# GitHub CLI and Git setup\" >> ~/.bashrc && echo \"gh auth setup-git 2>/dev/null || true\" >> ~/.bashrc && echo \"git config --global user.name \\\"\\$(gh api user --jq .login 2>/dev/null || echo vscode)\\\"\" >> ~/.bashrc && echo \"git config --global user.email \\\"\\$(gh api user --jq .login 2>/dev/null || echo vscode)@users.noreply.github.com\\\"\" >> ~/.bashrc && source ~/.bashrc && echo \"Dev container ready.\"'",
+  "postCreateCommand": "sudo chsh -s /usr/bin/zsh vscode && echo 'Dev container ready with Zsh!'",
   "forwardPorts": [3000, 8000, 8080],
   "customizations": {
     "vscode": {
@@ -32,7 +32,12 @@
         "cschleiden.vscode-github-actions" // GitHub Actions support
       ],
       "settings": {
-        "terminal.integrated.shell.linux": "/bin/bash"
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "/usr/bin/zsh"
+          }
+        }
       }
     }
   }
