@@ -1,0 +1,44 @@
+{
+  "name": "Mono Repo Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile.devcontainer",
+    "context": "."
+  },
+  // ...existing code...
+  "runArgs": [
+    "--privileged", // Needed for Docker-in-Docker and Minikube
+    "-v", "/var/run/docker.sock:/var/run/docker.sock"
+  ],
+  "mounts": [
+    "source=devcontainer-docker,target=/var/lib/docker,type=volume",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  ],
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "sudo chsh -s /usr/bin/zsh vscode && echo 'Dev container ready with Zsh!'",
+  "forwardPorts": [3000, 8000, 8080],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",                // Python support
+        "ms-python.vscode-pylance",        // Python language server
+        "ms-toolsai.jupyter",              // Jupyter notebooks
+        "ms-vscode.makefile-tools",        // Makefile support
+        "ms-azuretools.vscode-docker",     // Docker support
+        "ms-kubernetes-tools.vscode-kubernetes-tools", // Kubernetes support
+        "github.vscode-pull-request-github", // GitHub integration
+        "cschleiden.vscode-github-actions" // GitHub Actions support
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "/usr/bin/zsh"
+          }
+        }
+      }
+    }
+  }
+}

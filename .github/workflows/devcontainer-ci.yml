@@ -1,0 +1,21 @@
+name: Dev Container CI
+
+on:
+  pull_request:
+    paths:
+      - '.devcontainer/**'
+      - '.github/workflows/devcontainer-ci.yml'
+
+jobs:
+  test-devcontainer-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Dev Container Image
+        run: |
+          cd .devcontainer
+          docker build -f Dockerfile.devcontainer -t devcontainer-test:latest .
+          echo "✅ Dev container image built successfully!"
+          docker images | grep devcontainer-test
