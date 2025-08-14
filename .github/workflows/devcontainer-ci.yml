@@ -1,0 +1,24 @@
+name: Dev Container CI
+
+on:
+  pull_request:
+    paths:
+      - '.devcontainer/**'
+      - '.github/workflows/devcontainer-ci.yml'
+
+jobs:
+  test-devcontainer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test Dev Container Build
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: |
+            echo "Dev container build successful!"
+            echo "Testing basic commands..."
+            which git
+            which node || echo "Node not installed"
+            which python || echo "Python not installed"
