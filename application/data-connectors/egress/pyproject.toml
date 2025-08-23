@@ -1,11 +1,11 @@
 [project]
 name = "data-egress"
 version = "0.1.0"
-description = "Data egress pipelines - ClickHouse to external"
+description = "Data egress pipelines - PostgreSQL to external"
 requires-python = ">=3.10,<3.11"
 dependencies = [
-    "dlt[clickhouse]>=0.4.0",
-    "clickhouse-driver>=0.2.6",
+    "dlt[postgres]>=0.4.0",
+    "psycopg2-binary>=2.9.0",
     "pandas>=2.0.0",
     "python-dotenv>=1.0.0",
 ]

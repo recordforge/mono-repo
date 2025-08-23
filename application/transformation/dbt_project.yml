@@ -1,0 +1,58 @@
+name: 'data_transformation'
+version: '0.1.0'
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'postgres_transform'
+
+# These configurations specify where dbt should look for different types of files.
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+  - "logs"
+
+# Model configurations
+models:
+  data_transformation:
+    # Ingress layer - transformations for ingressed data
+    staging:
+      +materialized: view
+      +schema: staging
+    
+    intermediate:
+      +materialized: table
+      +schema: staging
+      
+    # Core layer - business logic
+    marts:
+      core:
+        +materialized: table
+        +schema: analytics
+        dimensions:
+          +materialized: table
+        facts:
+          +materialized: table
+        aggregates:
+          +materialized: table
+      
+      # Egress layer - for external consumption
+      egress:
+        +materialized: table
+        +schema: egress
+        denormalized:
+          +materialized: table
+        api_models:
+          +materialized: table
+        reporting:
+          +materialized: table
+
+# Seeds configuration
+seeds:
+  data_transformation:
+    +schema: raw

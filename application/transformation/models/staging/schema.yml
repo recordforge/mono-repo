@@ -1,0 +1,69 @@
+version: 2
+
+sources:
+  - name: raw
+    database: dataplatform
+    schema: raw
+    description: "Raw data layer - unprocessed data from various sources"
+    tables:
+      - name: person_records
+        description: "Person records from entity resolution dataset"
+        columns:
+          - name: unique_id
+            description: "Unique identifier for each person record"
+            tests:
+              - not_null
+              - unique
+          - name: first_name
+            description: "Person's first name"
+          - name: surname
+            description: "Person's last name"
+          - name: dob
+            description: "Date of birth"
+          - name: city
+            description: "City of residence"
+          - name: email
+            description: "Email address"
+          - name: cluster
+            description: "Entity resolution cluster ID"
+      
+      - name: events
+        description: "Event stream data"
+        columns:
+          - name: event_id
+            description: "Unique event identifier"
+            tests:
+              - not_null
+              - unique
+          - name: event_time
+            description: "Timestamp of the event"
+          - name: user_id
+            description: "User who triggered the event"
+          - name: event_type
+            description: "Type of event"
+          - name: properties
+            description: "JSON properties of the event"
+
+models:
+  - name: stg_person_records
+    description: "Staged and cleaned person records"
+    columns:
+      - name: unique_id
+        description: "Unique identifier"
+        tests:
+          - not_null
+          - unique
+      - name: first_name
+        description: "Normalized first name (lowercase, trimmed)"
+      - name: surname
+        description: "Normalized surname (lowercase, trimmed)"
+      - name: dob
+        description: "Date of birth"
+      - name: city
+        description: "Normalized city (lowercase, trimmed)"
+      - name: email
+        description: "Normalized email (lowercase, trimmed)"
+      - name: cluster
+        description: "Entity resolution cluster ID"
+      - name: loaded_at
+        description: "Timestamp when record was loaded to staging"

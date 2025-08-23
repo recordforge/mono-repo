@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Shared utilities and components"
 requires-python = ">=3.10"
 dependencies = [
-    "clickhouse-driver>=0.2.6",
+    "psycopg2-binary>=2.9.0",
     "pydantic>=2.0.0",
     "python-dotenv>=1.0.0",
     "structlog>=23.0.0",
