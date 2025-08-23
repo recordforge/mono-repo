@@ -1,8 +1,6 @@
 
-# syntax=docker/dockerfile:1
 FROM debian:bookworm-slim
 
-# Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -30,35 +28,29 @@ RUN apt-get update && \
         direnv \
         && rm -rf /var/lib/apt/lists/*
 
-# Set locale
+
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8
 
-# Install Node.js 20.x LTS (for npm compatibility)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 
-# Install Claude CLI globally
 RUN npm install -g @anthropic-ai/claude-code
 
-# Install Docker (Docker-in-Docker)
 RUN curl -fsSL https://get.docker.com | sh
 
-# Install kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
     && install -m 0755 kubectl /usr/local/bin/kubectl \
     && rm kubectl
     
 
-# Install Helm
 RUN curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 
-# Install Minikube (auto-detect arch)
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
       URL="https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"; \
@@ -73,7 +65,6 @@ RUN ARCH=$(uname -m) && \
 
 
 
-# Add a non-root user (VS Code default)
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=1000
@@ -82,12 +73,10 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-# Install uv (https://github.com/astral-sh/uv) as vscode user
 USER $USERNAME
 RUN curl -Ls https://astral.sh/uv/install.sh | bash
 ENV PATH="/home/vscode/.cargo/bin:${PATH}"
 
-# Install Oh My Zsh and plugins with retry logic
 RUN for i in 1 2 3 4 5; do \
         echo "Attempt $i to install Oh My Zsh..." && \
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended && \
@@ -111,15 +100,12 @@ RUN for i in 1 2 3 4 5; do \
         echo "Retrying plugin installation in 5 seconds..." && sleep 5; \
     done || true
 
-# Configure Zsh
 COPY --chown=$USERNAME:$USERNAME .zshrc /home/$USERNAME/.zshrc
 COPY --chown=$USERNAME:$USERNAME .p10k.zsh /home/$USERNAME/.p10k.zsh
 
 WORKDIR /workspace
 
-# Docker-in-Docker setup
 VOLUME ["/var/lib/docker"]
 ENV DOCKER_HOST=unix:///var/run/docker.sock
 
-# Entrypoint
 CMD ["sh"]

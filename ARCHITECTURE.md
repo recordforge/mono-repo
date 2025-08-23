@@ -30,14 +30,17 @@ mono-repo/
 │
 ├── infrastructure/             # Non-Python infrastructure
 │   ├── docker/
-│   │   └── clickhouse-compose.yml
+│   │   ├── postgres-compose.yml
+│   │   └── init-scripts/
+│   │       └── postgres/
 │   ├── kubernetes/
 │   └── terraform/
 │
 ├── scripts/                    # Global utility scripts
 │   ├── setup-all.sh
 │   ├── test-all.sh
-│   └── clickhouse-init.sql
+│   ├── postgres-init.sql
+│   └── seed_postgres.py
 │
 ├── docs/
 │   └── guides/
@@ -61,7 +64,7 @@ mono-repo/
     │   └── tests/
     │
     ├── data-connectors/        # dlt-based data movement
-    │   ├── ingress/           # Data ingress (into ClickHouse)
+    │   ├── ingress/           # Data ingress (into PostgreSQL)
     │   │   ├── pyproject.toml # Python 3.10
     │   │   ├── .python-version
     │   │   ├── uv.lock
@@ -74,7 +77,7 @@ mono-repo/
     │   │   │   └── destinations/
     │   │   └── tests/
     │   │
-    │   └── egress/            # Data egress (from ClickHouse)
+    │   └── egress/            # Data egress (from PostgreSQL)
     │       ├── pyproject.toml # Python 3.10
     │       ├── .python-version
     │       ├── uv.lock
@@ -87,14 +90,14 @@ mono-repo/
     │       │   └── destinations/
     │       └── tests/
     │
-    ├── transformation/         # SQLMesh Project
+    ├── transformation/         # dbt Project (PostgreSQL)
     │   ├── pyproject.toml     # Python 3.11
     │   ├── .python-version
     │   ├── uv.lock
     │   ├── .venv/
     │   ├── README.md
-    │   ├── sqlmesh_project.yaml
-    │   ├── config.yaml
+    │   ├── dbt_project.yml
+    │   ├── profiles.yml
     │   ├── models/
     │   │   ├── ingress/       # Transformations for ingressed data
     │   │   │   ├── staging/
@@ -158,7 +161,7 @@ mono-repo/
         ├── README.md
         ├── shared_lib/        # Package source
         │   ├── __init__.py
-        │   ├── clickhouse/
+        │   ├── postgres/
         │   ├── monitoring/
         │   └── utils/
         └── tests/
@@ -177,7 +180,7 @@ graph TB
         E[Egress Pipelines]
     end
     
-    subgraph ClickHouse
+    subgraph PostgreSQL
         RAW[Raw Layer]
         STAGE[Staging Layer]
         CORE[Core Layer]
@@ -185,8 +188,8 @@ graph TB
         MASTER[Master Data]
     end
     
-    subgraph SQLMesh Transformations
-        TI[Ingress Models]
+    subgraph dbt Transformations
+        TI[Staging Models]
         TC[Core Models]
         TE[Egress Models]
     end
@@ -212,7 +215,7 @@ graph TB
     ORCH[Dagster] -.->|orchestrates all| I & TI & TC & TE & ER & E
 ```
 
-## SQLMesh Transformation Layers
+## dbt Transformation Layers
 
 ### Ingress Transformations
 Process and prepare incoming data for core business logic:
@@ -246,7 +249,7 @@ requires-python = ">=3.11,<3.12"
 dependencies = [
     "dagster>=1.5.0",
     "dagster-webserver>=1.5.0",
-    "clickhouse-driver>=0.2.6",
+    "psycopg2-binary>=2.9.0",
     "pandas>=2.0.0",
     "pydantic>=2.0.0",
 ]
@@ -266,11 +269,11 @@ dev = [
 [project]
 name = "data-ingress"
 version = "0.1.0"
-description = "Data ingress pipelines - external to ClickHouse"
+description = "Data ingress pipelines - external to PostgreSQL"
 requires-python = ">=3.10,<3.11"
 dependencies = [
-    "dlt[clickhouse]>=0.4.0",
-    "clickhouse-driver>=0.2.6",
+    "dlt[postgres]>=0.4.0",
+    "psycopg2-binary>=2.9.0",
     "pandas>=2.0.0",
     "python-dotenv>=1.0.0",
 ]
@@ -288,11 +291,11 @@ dev = [
 [project]
 name = "data-egress"
 version = "0.1.0"
-description = "Data egress pipelines - ClickHouse to external"
+description = "Data egress pipelines - PostgreSQL to external"
 requires-python = ">=3.10,<3.11"
 dependencies = [
-    "dlt[clickhouse]>=0.4.0",
-    "clickhouse-driver>=0.2.6",
+    "dlt[postgres]>=0.4.0",
+    "psycopg2-binary>=2.9.0",
     "pandas>=2.0.0",
     "python-dotenv>=1.0.0",
 ]
@@ -310,11 +313,11 @@ dev = [
 [project]
 name = "transformation"
 version = "0.1.0"
-description = "SQLMesh transformations on ClickHouse"
+description = "Data transformations on PostgreSQL using dbt"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    "sqlmesh[clickhouse]>=0.100.0",
-    "clickhouse-driver>=0.2.6",
+    "dbt-postgres>=1.7.0",
+    "psycopg2-binary>=2.9.0",
     "pandas>=2.0.0",
     "pyyaml>=6.0.0",
 ]
@@ -333,14 +336,16 @@ dev = [
 # 1. Setup all projects
 make setup-all
 
-# 2. Start ClickHouse locally
-make clickhouse-local
-make clickhouse-init
+# 2. Start PostgreSQL locally
+make postgres-local
+make postgres-init
+make postgres-seed
 
 # 3. Work on specific project
 cd application/transformation
 uv sync
-uv run sqlmesh plan
+uv run dbt debug
+uv run dbt run
 
 # 4. Work on data connectors
 cd application/data-connectors/ingress
@@ -367,37 +372,35 @@ python --version  # 3.12
 # No manual activation needed - UV handles it!
 ```
 
-## SQLMesh Configuration
+## dbt Configuration
 
-### Project Configuration (`application/transformation/sqlmesh_project.yaml`)
+### Project Configuration (`application/transformation/dbt_project.yml`)
 ```yaml
-project_name: data_transformation
-default_gateway: clickhouse
+name: 'data_transformation'
+version: '0.1.0'
+profile: 'postgres_transform'
 
-model_defaults:
-  dialect: clickhouse
-  
-gateways:
-  clickhouse:
-    connection:
-      type: clickhouse
-      host: ${CLICKHOUSE_HOST}
-      port: 9440
-      database: analytics
-      secure: true
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
 
-model_naming_rules:
-  # Ingress models
-  - match: "^ingress/"
-    database: staging
-  
-  # Core models  
-  - match: "^core/"
-    database: analytics
+models:
+  data_transformation:
+    staging:
+      +materialized: view
+      +schema: staging
     
-  # Egress models
-  - match: "^egress/"
-    database: egress
+    marts:
+      core:
+        +materialized: table
+        +schema: analytics
+      
+      egress:
+        +materialized: table
+        +schema: egress
 ```
 
 ## CI/CD Configuration

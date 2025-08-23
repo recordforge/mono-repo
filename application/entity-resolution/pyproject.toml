@@ -1,11 +1,11 @@
 [project]
 name = "entity-resolution"
 version = "0.1.0"
-description = "Splink entity resolution on ClickHouse"
+description = "Splink entity resolution on PostgreSQL"
 requires-python = ">=3.10,<3.11"
 dependencies = [
     "splink>=3.9.0",
-    "clickhouse-driver>=0.2.6",
+    "psycopg2-binary>=2.9.0",
     "pandas>=2.0.0",
     "pyarrow>=14.0.0",
 ]
