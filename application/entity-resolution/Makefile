@@ -55,43 +55,43 @@ clean:
 # Explore demo datasets
 explore:
 	@echo "Exploring demo datasets..."
-	.venv/bin/python src/explore_demo_data.py
+	uv run src/explore_demo_data.py
 
 # Run full demo pipeline
 demo:
 	@echo "Running entity resolution demo pipeline..."
-	.venv/bin/python src/entity_resolution_demo.py
+	uv run src/entity_resolution_demo.py
 
 # Train model only
 train:
 	@echo "Training Splink model..."
-	.venv/bin/python -c "from src.entity_resolution_demo import *; df = load_demo_data(); settings = create_splink_settings(); linker = Linker(df, settings, DuckDBAPI()); train_model(linker); print('Model trained successfully!')"
+	uv run -c "from src.entity_resolution_demo import *; df = load_demo_data(); settings = create_splink_settings(); linker = Linker(df, settings, DuckDBAPI()); train_model(linker); print('Model trained successfully!')"
 
 # Generate predictions only
 predict:
 	@echo "Generating predictions..."
-	.venv/bin/python -c "from src.entity_resolution_demo import *; df = load_demo_data(); settings = create_splink_settings(); linker = Linker(df, settings, DuckDBAPI()); train_model(linker); predictions = run_predictions(linker); print('Predictions generated!')"
+	uv run -c "from src.entity_resolution_demo import *; df = load_demo_data(); settings = create_splink_settings(); linker = Linker(df, settings, DuckDBAPI()); train_model(linker); predictions = run_predictions(linker); print('Predictions generated!')"
 
 # Create clusters only
 cluster:
 	@echo "Creating entity clusters..."
-	.venv/bin/python -c "from src.entity_resolution_demo import *; df = load_demo_data(); settings = create_splink_settings(); linker = Linker(df, settings, DuckDBAPI()); train_model(linker); predictions = run_predictions(linker); create_clusters(linker, predictions)"
+	uv run -c "from src.entity_resolution_demo import *; df = load_demo_data(); settings = create_splink_settings(); linker = Linker(df, settings, DuckDBAPI()); train_model(linker); predictions = run_predictions(linker); create_clusters(linker, predictions)"
 
 # Generate reports only
 report:
 	@echo "Generating visualization reports..."
-	.venv/bin/python -c "from src.entity_resolution_demo import *; df = load_demo_data(); settings = create_splink_settings(); linker = Linker(df, settings, DuckDBAPI()); train_model(linker); generate_reports(linker)"
+	uv run -c "from src.entity_resolution_demo import *; df = load_demo_data(); settings = create_splink_settings(); linker = Linker(df, settings, DuckDBAPI()); train_model(linker); generate_reports(linker)"
 
 # Run with PostgreSQL backend (requires postgres to be running)
 postgres-demo:
 	@echo "Running entity resolution with PostgreSQL backend..."
 	@echo "Note: This requires PostgreSQL to be running and configured"
-	.venv/bin/python src/entity_resolution_postgres.py
+	uv run src/entity_resolution_postgres.py
 
 # Load data into PostgreSQL
 postgres-load:
 	@echo "Loading data into PostgreSQL..."
-	.venv/bin/python -c "import pandas as pd; import psycopg2; from sqlalchemy import create_engine; df = pd.read_parquet('data/fake_1000.parquet'); engine = create_engine('postgresql://postgres:postgres@localhost:5432/entity_resolution'); df.to_sql('fake_persons', engine, if_exists='replace', index=False); print('Data loaded to PostgreSQL!')"
+	uv run -c "import pandas as pd; import psycopg2; from sqlalchemy import create_engine; df = pd.read_parquet('data/fake_1000.parquet'); engine = create_engine('postgresql://postgres:postgres@localhost:5432/entity_resolution'); df.to_sql('fake_persons', engine, if_exists='replace', index=False); print('Data loaded to PostgreSQL!')"
 
 # Run tests
 test:
@@ -111,7 +111,7 @@ format:
 # Open Python shell with imports
 shell:
 	@echo "Opening Python shell with project imports..."
-	.venv/bin/python -i -c "from src.entity_resolution_demo import *; from splink import *; import pandas as pd; print('Imports loaded: entity_resolution_demo, splink, pandas')"
+	uv run -i -c "from src.entity_resolution_demo import *; from splink import *; import pandas as pd; print('Imports loaded: entity_resolution_demo, splink, pandas')"
 
 # Start Jupyter notebook
 jupyter:
@@ -127,7 +127,7 @@ all: clean install explore demo report
 check-data:
 	@echo "Checking data quality..."
 	@if [ -f data/fake_1000.parquet ]; then \
-		.venv/bin/python -c "import pandas as pd; df = pd.read_parquet('data/fake_1000.parquet'); print(f'Records: {len(df)}'); print(f'Columns: {df.columns.tolist()}'); print(f'Nulls:\\n{df.isnull().sum()}')"; \
+		uv run -c "import pandas as pd; df = pd.read_parquet('data/fake_1000.parquet'); print(f'Records: {len(df)}'); print(f'Columns: {df.columns.tolist()}'); print(f'Nulls:\\n{df.isnull().sum()}')"; \
 	else \
 		echo "No data file found. Run 'make explore' first."; \
 	fi
@@ -138,7 +138,7 @@ cluster-stats:
 	@for threshold in 0.95 0.90 0.80; do \
 		if [ -f "data/clusters_threshold_$$threshold.csv" ]; then \
 			echo "\nThreshold $$threshold:"; \
-			.venv/bin/python -c "import pandas as pd; df = pd.read_csv('data/clusters_threshold_$$threshold.csv'); clusters = df.groupby('cluster_id').size(); print(f'  Total clusters: {len(clusters)}'); print(f'  Clusters with >1 record: {(clusters > 1).sum()}'); print(f'  Max cluster size: {clusters.max()}')"; \
+			uv run -c "import pandas as pd; df = pd.read_csv('data/clusters_threshold_$$threshold.csv'); clusters = df.groupby('cluster_id').size(); print(f'  Total clusters: {len(clusters)}'); print(f'  Clusters with >1 record: {(clusters > 1).sum()}'); print(f'  Max cluster size: {clusters.max()}')"; \
 		fi \
 	done
 

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for:*)",
+      "Bash(do echo \"Allowing $dir\")",
+      "Bash(direnv allow:*)",
+      "Bash(done)",
+      "Bash(source:*)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:moj-analytical-services.github.io)",
+      "Bash(.venv/bin/python:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

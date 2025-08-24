@@ -70,7 +70,7 @@ def load_splink_data(conn, csv_path):
 
 def main():
     """Main function"""
-    csv_path = '/workspaces/mono-repo/fixtures/test-data/fake_1000_from_splink_demos.csv'
+    csv_path = 'fixtures/test-data/fake_1000_from_splink_demos.csv'
     
     if not os.path.exists(csv_path):
         print(f"Error: Test data file not found at {csv_path}")

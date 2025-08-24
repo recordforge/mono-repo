@@ -133,6 +133,9 @@ postgres-seed:
 	@python scripts/seed_postgres.py || (echo "Failed to seed data. Ensure PostgreSQL is running and psycopg2 is installed." && exit 1)
 	@echo "Test data loaded successfully!"
 
+postgres-quick-start: postgres-stop postgres-local postgres-init 
+# postgres-seed ## Quick start PostgreSQL setup
+
 # Quick start commands
 quick-start:
 	@echo "Quick start setup..."

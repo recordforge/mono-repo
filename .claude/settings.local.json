@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make quick-start)",
+      "Bash(make:*)",
+      "Bash(sudo docker compose:*)",
+      "Bash(sudo docker exec postgres-local pg_isready:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(uv run:*)",
+      "Bash(sudo docker inspect:*)",
+      "Bash(sudo docker exec:*)",
+      "Bash(sudo docker cp:*)",
+      "Bash(POSTGRES_HOST=172.17.0.1 uv run dbt debug)",
+      "Bash(POSTGRES_HOST=172.19.0.2 uv run dbt debug)",
+      "Bash(POSTGRES_HOST=host.docker.internal uv run dbt debug)",
+      "Bash(POSTGRES_HOST=host.docker.internal uv run dbt run)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
