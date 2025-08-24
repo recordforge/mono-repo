@@ -177,7 +177,7 @@ def generate_reports(linker):
     print("Generating model parameters report...")
     params_chart = linker.visualisations.match_weights_chart()
     params_path = reports_dir / "match_weights.html"
-    params_chart.to_html(params_path)
+    params_chart.save(str(params_path))
     print(f"  Saved to: {params_path}")
     
     # 2. Waterfall chart (shows how match weights accumulate)
@@ -187,7 +187,7 @@ def generate_reports(linker):
         linker.inference.predict(threshold_match_weight=0).as_record_dict(limit=1)
     )
     waterfall_path = reports_dir / "waterfall_chart.html"
-    waterfall_chart.to_html(waterfall_path)
+    waterfall_chart.save(str(waterfall_path))
     print(f"  Saved to: {waterfall_path}")
     
     print("\nReports generated! Open HTML files in browser to view.")

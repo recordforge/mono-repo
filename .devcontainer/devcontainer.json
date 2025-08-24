@@ -29,7 +29,9 @@
         "ms-azuretools.vscode-docker",     // Docker support
         "ms-kubernetes-tools.vscode-kubernetes-tools", // Kubernetes support
         "github.vscode-pull-request-github", // GitHub integration
-        "cschleiden.vscode-github-actions" // GitHub Actions support
+        "cschleiden.vscode-github-actions", // GitHub Actions support
+        "innoverio.vscode-dbt-power-user",  // dbt support
+        "mechatroner.rainbow-csv"        // csv color support
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
