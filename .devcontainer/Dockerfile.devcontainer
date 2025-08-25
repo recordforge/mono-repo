@@ -74,8 +74,12 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 USER $USERNAME
+
+# Install rust based things
 RUN curl -Ls https://astral.sh/uv/install.sh | bash
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/home/vscode/.cargo/bin:${PATH}"
+## end of rust things
 
 RUN for i in 1 2 3 4 5; do \
         echo "Attempt $i to install Oh My Zsh..." && \

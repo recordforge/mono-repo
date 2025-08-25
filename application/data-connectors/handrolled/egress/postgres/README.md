@@ -1,0 +1,1 @@
+This is the postgres egress tool that will stream from the postgres replication slot and write all the cdc that happens to seperate files based by table object.
