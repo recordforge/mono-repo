@@ -29,6 +29,7 @@
         "ms-azuretools.vscode-docker",     // Docker support
         "ms-kubernetes-tools.vscode-kubernetes-tools", // Kubernetes support
         "github.vscode-pull-request-github", // GitHub integration
+        "rust-lang.rust-analyzer",      // Rust support
         "cschleiden.vscode-github-actions" // GitHub Actions support
       ],
       "settings": {

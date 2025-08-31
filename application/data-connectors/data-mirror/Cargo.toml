@@ -1,0 +1,20 @@
+[package]
+name = "data-mirror"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+argh = "0.1.13"
+pg_replicate = "0.1.0"
+tokio-postgres = "0.7.13"
+
+
+[profile.release]
+opt-level = "z"          
+lto = "fat"              # Maximum cross-module optimization
+codegen-units = 1        
+strip = "symbols"        # Strip all symbols
+panic = "abort"          
+debug = false            # Remove all debug information
+debug-assertions = false # Disable runtime checks
+overflow-checks = false  # Remove overflow protection
